@@ -1,6 +1,9 @@
 import numpy as np
 
 class GestureRecognizer():
+    ###
+    ### Not implemented yet
+    ###
     def __init__(self, class_num):
         self.class_num = class_num
 
