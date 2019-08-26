@@ -2,15 +2,68 @@
 
 import PIL
 import numpy as np
+import torch
 import glob
 import os
 import matplotlib.pyplot as plt
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
 
 dataset_dir = os.path.join('source', 'dataset')
 x_name = 'X.npy'
 y_name = 'Y.npy'
 
-def get_gesture_dataset(size=(100, 100), shuffle=True):
+class GestureDataset(Dataset):
+    def __init__(self, X, Y, trs=None):
+        """
+        Параметры:
+        ----------
+        - X: 
+
+        - y: 
+
+        - trs: torchvision.transforms
+            transforms
+
+        """
+        self.X = X.copy()
+        self.Y = Y.copy()
+        self.trs = trs
+
+        if self.trs is None:
+            self.trs = transforms.ToTensor()
+
+    def __len__(self):
+        return len(self.X)
+
+    def __getitem__(self, idx):
+        x = self.X[idx] # (3, 64, 64) -> (64, 64, 3)
+        y = self.Y[idx]
+
+        if len(x.shape) > 2: 
+            # если изображение многоканальное
+            if x.shape[0] == 3:
+                # если первое пространство отведено для каналов,
+                # то транспонируем тензор так, чтобы оно стало послденим пространством
+                x = np.transpose(x, (1, 2, 0))
+            elif x.shape[0] == 1:
+                # если изображение черно-белое
+                x = np.squeeze(x, 0)
+
+        # конвертируем numpy array в PIL.Image
+        img = PIL.Image.fromarray(x)
+        x_tensor = self.trs(img)
+
+        return x_tensor, y
+
+
+def create_loader(X, y, batch_size, num_workers=0, shuffle=True, trs=None):
+    gesture_dataset = GestureDataset(X, y, trs=trs)
+    gesture_loader = DataLoader(gesture_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    return gesture_loader
+
+
+def get_gesture_dataset(size=(100, 100), shuffle=True, gray_scale=True):
     """
     Возвращает два объекта: тензор с изображениями жестов
     и вектор классов.
@@ -30,6 +83,9 @@ def get_gesture_dataset(size=(100, 100), shuffle=True):
 
     - y: numpy array 
         Вектор ответов (с классами)
+    
+    - gray_scale: bool
+        Если True, то изображения буду конвертированны в черно-белое
     """
     cwd = os.getcwd()
     to_dataset_path = os.path.join(cwd, dataset_dir)
@@ -43,7 +99,7 @@ def get_gesture_dataset(size=(100, 100), shuffle=True):
         np.random.seed(17)
         np.random.shuffle(idxs)
 
-    # resize
+    # меняем размер если необходимо
     if size != (100, 100):
         _X = []
         for pix in X:
@@ -52,8 +108,16 @@ def get_gesture_dataset(size=(100, 100), shuffle=True):
             _X.append(np.asarray(img))
 
         X = np.stack(_X)
+
+    # транспонируем тензор (BS, H, W, C) -> (BS, C, H, W)
+    X = np.transpose(X, (0, 3, 1, 2))
+
+    returns = X[idxs], y[idxs]
+
+    if gray_scale:
+        returns = X[idxs][:, :1, :, :], y[idxs]
     
-    return np.expand_dims(X[idxs], 1), y[idxs]
+    return returns
 
 
 def load_imgs_from_folder(path, size=(64, 64), gray_scale=True):
@@ -141,7 +205,13 @@ def show_image(image, figsize=(5,5), title=''):
     - img: numpy.array
         массив numpy, с тремя или одним каналом (цветное или ч/б фото)
     """
-    img = image.copy()
+    img = None
+
+    if type(image) == torch.Tensor:
+        # convert to numpy if tensor was passed
+        img = image.numpy().copy()
+    else:
+        img = image.copy()
 
     if len(img.shape) < 2:
         s = np.sqrt(len(img)).astype(int)
@@ -149,6 +219,8 @@ def show_image(image, figsize=(5,5), title=''):
 
     if img.shape[0] == 1:
         img = np.squeeze(img, 0)
+    elif img.shape[0] == 3:
+        img = np.transpose(img, (1, 2, 0))
         
     plt.figure(figsize=figsize)
     plt.imshow(img)

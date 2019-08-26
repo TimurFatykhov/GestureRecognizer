@@ -92,10 +92,10 @@ class NNClassifier():
         
         - batch_size: int
         
-        - valid_data: tuple (numpy.array, numpy.array)
+        - valid_data: tuple (numpy.array, numpy.array) (default: None)
             (X_valid, y_valid)
             
-        - log_every_epoch: int
+        - log_every_epoch: int (default: None)
         """
         self.model.train()
         self.model.to(self.device)
@@ -138,6 +138,84 @@ class NNClassifier():
                     descr += ('v_loss: %5.3f' % v_loss)
                     
                 bar.set_description(descr)
+
+    def fit_loader(self, train_loader, valid_loader, epochs, log_every_epoch=None):
+        """
+        Fit neural network with torch.utils.data.DataLoader
+
+        Parameters:
+        -----------
+        - train_loader: torch.utils.data.DataLoader
+
+        - valid_loader: torch.utils.data.DataLoader
+
+        - epochs: int
+            
+        - log_every_epoch: int (default: None)
+        """
+        self.model.train()
+        self.model.to(self.device)
+        
+        bar = tqdm(range(1, epochs+1)) # progress bar
+        for epoch in bar:
+            cum_loss_train = 0
+            part = 0
+            for X_batch, y_batch in train_loader:
+                part += 1
+                X_batch =X_batch.to(self.device)
+                y_batch =y_batch.to(self.device)
+
+                proba_batch = self.model(X_batch)
+
+                loss = torch.nn.functional.cross_entropy(proba_batch, y_batch)
+                cum_loss_train += loss.item()
+
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+            
+            self.train_history.append(cum_loss_train / part)
+                
+            if valid_loader is not None:
+                valid_loss = self.validate_loader(valid_loader)
+                self.valid_history.append(valid_loss)
+                    
+            if log_every_epoch is not None and epoch % log_every_epoch == 0:
+                descr = None
+                t_loss = self.train_history[-1]
+                descr = ('t_loss: %5.3f' % t_loss)
+                
+                if valid_loader is not None:
+                    v_loss = self.valid_history[-1]
+                    descr += ('v_loss: %5.3f' % v_loss)
+                    
+                bar.set_description(descr)
+
+    def validate_loader(self, loader):
+        """
+        Validate loader.
+
+        Parameters:
+        -----------
+        - loader: torch.utils.data.DataLoader
+        """
+        self.model.eval()
+        self.model.to(self.device)
+        
+        proba = []
+        loss = 0
+        with torch.no_grad():
+            for X_batch, y_batch in loader:
+                X_batch = X_batch.to(self.device)
+                y_batch = y_batch.to(self.device)
+
+                proba = self.model(X_batch)
+                loss += torch.nn.functional.cross_entropy(proba, y_batch).item()
+
+        return loss / len(loader)
+
+
+
                     
 
 

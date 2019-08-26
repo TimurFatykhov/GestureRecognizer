@@ -11,5 +11,6 @@ class GestureRecognizer():
         ###
         ### Not implemented yet
         ###
+        # model = torch.load(PATH)
 
         return np.random.randint(0, self.class_num)[0]
