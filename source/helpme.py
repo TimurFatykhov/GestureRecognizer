@@ -63,7 +63,7 @@ def create_loader(X, y, batch_size, num_workers=0, shuffle=True, trs=None):
     return gesture_loader
 
 
-def get_gesture_dataset(size=(100, 100), shuffle=True, gray_scale=True):
+def get_gesture_dataset(size=(100, 100), shuffle=True, gray_scale=False):
     """
     Возвращает два объекта: тензор с изображениями жестов
     и вектор классов.
@@ -120,7 +120,7 @@ def get_gesture_dataset(size=(100, 100), shuffle=True, gray_scale=True):
     return returns
 
 
-def load_imgs_from_folder(path, size=(64, 64), gray_scale=True):
+def load_imgs_from_folder(path, size=(64, 64), gray_scale=False):
     """
     Загружает все изображения из указанной папки и возвращает их в виде
     numpy тензора.
@@ -162,11 +162,11 @@ def load_imgs_from_folder(path, size=(64, 64), gray_scale=True):
         img = img.resize(size)
         pix = np.asarray(img)
         if gray_scale:
-            pix = pix[..., 0]
+            pix = pix[..., :1]
             
         pixel_imgs.append(pix)
     
-    return np.expand_dims(np.stack(pixel_imgs), 1)
+    return np.transpose(np.stack(pixel_imgs), (0, 3, 1, 2))
 
 
 def calculate_pad(input_size, kernel_size, stride, output_size):
