@@ -1,6 +1,8 @@
 *untracked*
 *source/untracked*
 *.ipynb_checkpoints*
+*tmp*
+*source/tmp*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

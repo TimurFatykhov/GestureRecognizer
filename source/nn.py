@@ -1,12 +1,17 @@
 import numpy as np
+import time
 
 class GestureRecognizer():
-    def __init__(self, class_num):
-        self.class_num = class_num
+    def __init__(self):
+        ###
+        ### Not implemented yet
+        ###
+
+        pass
 
     def predict(self, frame):
         ###
         ### Not implemented yet
         ###
-
-        return np.random.randint(0, self.class_num)[0]
+        time.sleep(0.6)
+        return np.random.randint(0, 10)
