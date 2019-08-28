@@ -20,8 +20,9 @@ class APP():
             frame = cv2.flip(frame, 1)
 
             crop = frame[20:320, 160:480].copy()
+            crop = cv2.resize(crop, (64, 64))
 
-            number = self.classifier.predict(frame)
+            number = self.classifier.predict(crop)
             cv2.putText(frame, str(number), (20,50), cv2.FONT_HERSHEY_SIMPLEX, 2, color_green, 2)
             cv2.rectangle(frame, (160,20), (480,320), color_green, thickness=2, lineType=8, shift=0)
 
@@ -37,6 +38,6 @@ class APP():
 if __name__ == '__main__':
     try:
         myApp = APP()
-        # myApp.run()
+        myApp.run()
     except KeyboardInterrupt:
         print('\n\nApp was stopped.\n')
