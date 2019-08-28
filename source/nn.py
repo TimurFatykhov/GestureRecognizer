@@ -13,5 +13,5 @@ class GestureRecognizer():
         ###
         ### Not implemented yet
         ###
-        time.sleep(0.6)
+        time.sleep(0.05)
         return np.random.randint(0, 10)
