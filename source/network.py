@@ -213,6 +213,37 @@ class NNClassifier():
                 loss += torch.nn.functional.cross_entropy(proba, y_batch).item()
 
         return loss / len(loader)
+    
+    
+    
+    
+    def evaluate_score_loader(self, loader):
+        """
+        Evaluate loader.
+
+        Parameters:
+        -----------
+        - loader: torch.utils.data.DataLoader
+        """
+        self.model.eval()
+        self.model.to(self.device)
+        
+        proba = []
+        predict = []
+        y = []
+        loss = 0
+        with torch.no_grad():
+            for X_batch, y_batch in loader:
+                X_batch = X_batch.to(self.device)
+
+                proba = self.model(X_batch)
+                pred = np.ravel(torch.argmax(proba, 1).to('cpu').numpy())
+                predict.append(pred)
+                y.append( np.ravel(y_batch.to('cpu').numpy()) )
+        
+        predict = np.concatenate(predict)
+        y = np.concatenate(y)
+        return (predict == y).mean()
 
 
 
