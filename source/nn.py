@@ -2,12 +2,11 @@ import numpy as np
 import time
 
 class GestureRecognizer():
-    def __init__(self):
-        ###
-        ### Not implemented yet
-        ###
-
-        pass
+    ###
+    ### Not implemented yet
+    ###
+    def __init__(self, class_num):
+        self.class_num = class_num
 
     def predict(self, frame):
         ###
