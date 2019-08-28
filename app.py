@@ -1,31 +1,26 @@
 from source.nn import GestureRecognizer
+import cv2
 
 class APP():
     def __init__(self):
         self.classifier = GestureRecognizer()
-        #########################################################################
-        #                                                                       #
-        # Можно в свойствах класса также хранить какие-то переменные,           #
-        # например размер обрезаемой части изображения:                         #
-        #                                                                       #
-        # self.h = 450                                                          #
-        # self.w = 450                                                          #
-        #                                                                       #
-        #########################################################################
+        self.y = 60
+        self.x = 60
+        self.h = 450
+        self. w = 450
 
     
     def run(self):
-        #########################################################################
-        #                                                                       #
-        # Твой код здесь. Именно этот метод будет "запускать"                   #
-        # приложение. Сюда можно вставить строки из юпитера.                    #
-        #                                                                       #
-        # Ниже я вставил кусок кода, который определяет какой жест (класс)      #
-        # представлен на изображении. Пока что метод возвращает случайно число  #
-        # от 0 до 9.                                                            #
-        #                                                                       #
-        #########################################################################
+
         while(True):
+            ret, frame = cap.read()
+            ret, frame2 = cap.read()\
+            crop = frame2[y:y+h, x:x+w].copy()\n",
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)\n",
+            cv2.putText(frame, str(number), (20,20), cv2.FONT_HERSHEY_SIMPLEX, 1, color_black, 2)\n",
+            cv2.rectangle(frame, (60,450), (450,60), color_red, thickness=2, lineType=8, shift=0)\n",
+            cv2.imshow('Video', frame)\n",
+            cv2.imshow('Video2',crop)\n",
             frame = None
             image_class = self.classifier.predict(frame)
             print(image_class)
