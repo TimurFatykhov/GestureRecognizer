@@ -37,6 +37,6 @@ class APP():
 if __name__ == '__main__':
     try:
         myApp = APP()
-        myApp.run()
+        # myApp.run()
     except KeyboardInterrupt:
         print('\n\nApp was stopped.\n')
