@@ -13,21 +13,29 @@ class APP():
         color_green = (0, 255, 0)
         color_black = (0, 0, 0)
         cam = cv2.VideoCapture(0)
+
+        i = 1
+        number = '?'
         while True:
             _, frame = cam.read()
+            i += 1
             height, width, channels = frame.shape
             frame = cv2.resize(frame, (640, 360))
-            frame = cv2.flip(frame, 1)
+            # frame = cv2.flip(frame, 1)
 
             crop = frame[20:320, 160:480].copy()
             crop = cv2.resize(crop, (64, 64))
+            crop = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
 
-            number = self.classifier.predict(crop)
+            if i % 15 == 0:
+                number = self.classifier.predict(crop)
+                i = 1
+
             cv2.putText(frame, str(number), (20,50), cv2.FONT_HERSHEY_SIMPLEX, 2, color_green, 2)
             cv2.rectangle(frame, (160,20), (480,320), color_green, thickness=2, lineType=8, shift=0)
 
             cv2.imshow('my webcam', frame)
-            cv2.imshow('crop', crop)
+            # cv2.imshow('flipped', frame2)
             if cv2.waitKey(1) == 27: 
                 break  # esc to quit
         cv2.destroyAllWindows()
